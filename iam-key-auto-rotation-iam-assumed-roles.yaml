@@ -5,41 +5,27 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: ASA IAM Role Configurations
+          default: IAM Role Configurations
         Parameters:
-          - IAMRoleName
           - ExecutionRoleName
           - PrimaryAccountID
-          - IAMExemptionGroup
           - AWSOrgID
     ParameterLabels:
-      IAMRoleName:
-        default: Assumed IAM Role Name
       ExecutionRoleName:
         default: IAM Execution Role Name
       PrimaryAccountID:
         default: Primary AWS Account ID
-      IAMExemptionGroup:
-        default: IAM Exemption Group
       AWSOrgID:
         default: AWS Organization ID
 Parameters:
-  IAMRoleName:
-    Description: "Enter the name of IAM Role that the main ASA-iam-key-auto-rotation-and-notifier-solution.yaml CloudFormation template will assume."
-    Type: String
-    Default: "asa-iam-key-rotation-lambda-assumed-role"
   ExecutionRoleName:
     Description: "Enter the name of IAM Execution Role that will assume the sub-account role for Lambda Execution."
     Type: String
-    Default: "asa-iam-key-rotation-lambda-execution-role"
+    Default: "iam-key-rotation-lambda-execution-role"
   PrimaryAccountID:
     Description: "Enter the primary AWS Account ID that will you will be deploying the ASA-iam-key-auto-rotation-and-notifier-solution.yaml CloudFormation template to."
     Type: String
     Default: ""
-  IAMExemptionGroup:
-    Description: "Manage IAM Key Rotation exemptions via an IAM Group. Enter the IAM Group name being used to facilitate IAM accounts excluded from auto-key rotation."
-    Type: String
-    Default: IAMKeyRotationExemptionGroup
   AWSOrgID:
     Description: "Enter your AWS Organization ID, this will be used to restricted execution permissions to only approved AWS Accounts within your AWS Organization."
     Type: String
@@ -97,21 +83,9 @@ Resources:
                 - Effect: Allow
                   Action:
                     - iam:GetGroup
-                  Resource:
-                    - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:group/${IAMExemptionGroup}"
-                - Effect: Allow
-                  Action:
-                    - sts:AssumeRole
                   Resource: !Sub arn:${AWS::Partition}:iam::${PrimaryAccountID}:role/${ExecutionRoleName}
                   Condition:
                     StringEquals:
                       aws:PrincipalOrgID: !Ref AWSOrgID
       Path: /
 
-  ##################################################################
-  # ASA IAM Group that will be used to manage account exemptions
-  ##################################################################
-  ASAIAMExemptionsGroup:
-    Type: AWS::IAM::Group
-    Properties: 
-      GroupName: !Ref IAMExemptionGroup
