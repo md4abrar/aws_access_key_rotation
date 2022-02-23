@@ -18,6 +18,10 @@ Metadata:
       AWSOrgID:
         default: AWS Organization ID
 Parameters:
+  IAMRoleName:
+    Description: "Enter the name of IAM Role"
+    Type: String
+    Default: "iam-key-rotation-lambda-assume-role"
   ExecutionRoleName:
     Description: "Enter the name of IAM Execution Role that will assume the sub-account role for Lambda Execution."
     Type: String
